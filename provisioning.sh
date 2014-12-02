@@ -27,10 +27,6 @@ debconf-set-selections <<< 'mysql-server-5.5 mysql-server/root_password password
 debconf-set-selections <<< 'mysql-server-5.5 mysql-server/root_password_again password root'
 apt-get install -y mysql-client mysql-server
 
-# create symfony database
-mysql -uroot -proot -e "CREATE DATABASE hospi CHARACTER SET utf8 COLLATE utf8_general_ci"
-mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION; FLUSH PRIVILEGES;"
-
 # restart mysql
 service mysql restart
 
@@ -151,6 +147,6 @@ chown vagrant:vagrant /home/vagrant/.profile
 
 # add useful aliases in vagrant user's .bashrc
 cat << 'EOF' >> /home/vagrant/.bashrc
-alias my='mysql -u root -proot -D hospi'
+alias my='mysql -u root -proot'
 EOF
 chown vagrant:vagrant /home/vagrant/.bashrc
