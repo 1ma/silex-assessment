@@ -110,7 +110,7 @@ server {
 
 EOF
 
-ln -s /etc/nginx/sites-available/symfony /etc/nginx/sites-enabled/hospi
+ln -s /etc/nginx/sites-available/hospi /etc/nginx/sites-enabled/hospi
 
 # restart nginx service
 service nginx restart
