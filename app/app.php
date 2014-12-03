@@ -7,23 +7,11 @@ use Silex\Provider\TwigServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
 
 // Services Configuration
-$app->register(
-    new DoctrineServiceProvider(),
-    array(
-        'db.options' => array(
-            'driver'   => $app['cnf.db.driver'],
-            'host'     => $app['cnf.db.host'],
-            'dbname'   => $app['cnf.db.dbname'],
-            'user'     => $app['cnf.db.user'],
-            'password' => $app['cnf.db.password'],
-            'charset'  => 'utf8'
-        )
-    )
-);
+$app->register(new DoctrineServiceProvider());
 
 $app->register(
     new TwigServiceProvider(),
-    array('twig.path' => $app['cnf.twig.path'])
+    array('twig.path' => __DIR__ . '/../views')
 );
 
 // Route Definitions

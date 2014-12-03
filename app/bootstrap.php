@@ -6,12 +6,13 @@ $app = new \Silex\Application();
 
 $app['debug'] = true;
 
-$app['cnf.twig.path'] = __DIR__ . '/../views';
-
-$app['cnf.db.driver']   = 'pdo_mysql';
-$app['cnf.db.host']     = 'localhost';
-$app['cnf.db.dbname']   = 'hospi';
-$app['cnf.db.user']     = 'root';
-$app['cnf.db.password'] = 'root';
+$app['db.options'] = array(
+    'driver'   => 'pdo_mysql',
+    'host'     => 'localhost',
+    'dbname'   => 'hospi',
+    'user'     => 'root',
+    'password' => 'root',
+    'charset'  => 'utf8'
+);
 
 return $app;
