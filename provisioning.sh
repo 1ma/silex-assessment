@@ -13,7 +13,7 @@ echo "127.0.0.1 hospi.dev" >> /etc/hosts
 
 
 ### install miscellaneous software
-apt-get install -y python-software-properties curl tree htop git
+apt-get install -y python-software-properties curl tree htop git nfs-common portmap
 
 
 ### register third party PPAs

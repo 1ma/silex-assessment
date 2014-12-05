@@ -11,7 +11,10 @@ $app->register(new DoctrineServiceProvider());
 
 $app->register(
     new TwigServiceProvider(),
-    array('twig.path' => __DIR__ . '/../views')
+    array(
+        'twig.path' => __DIR__ . '/../views',
+        'twig.options' => array('cache' => __DIR__ . '/../var/cache')
+    )
 );
 
 // Route Definitions
