@@ -67,6 +67,7 @@ $app->get('/', function () use ($app) {
         $text .= 'No estas identificat (ets un usuari anònim)';
     } else {
         $text .= 'Estàs identificat com a ' . $user->getUsername();
+        $text .= '<br><br>' . print_r($user, true);
     }
 
     return $text;
@@ -84,8 +85,21 @@ $app->get('/login', function (Request $request) use ($app) {
 
 $app->post('/register', function (Request $request) use ($app) {
     $email = $request->request->get('email');
-    $password = $request->request->get('password');
-    $app['monolog']->addNotice(sprintf("Nou registre! email '%s' i password '%s", $email, $password));
+    $rawPassword = $request->request->get('password');
+
+    $encoder = new \Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder();
+    $salt = md5(uniqid(true));
+    $password = $encoder->encodePassword($rawPassword, $salt);
+
+    $newUser = new \Hospi\Model\User($email, $password, md5(uniqid(true)));
+    $now = new \DateTime();
+    $app['db']->insert('users', array(
+        'email' => $email,
+        'password' => $password,
+        'salt' => $salt,
+        'roles' => \Hospi\Model\User::ROLE_USER,
+        'created_at' => $now->format('Y-m-d H:i:s')
+    ));
 
     return $app->redirect('/');
 });
