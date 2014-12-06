@@ -2,6 +2,7 @@
     "name": "the/hospi",
     "require": {
         "doctrine/dbal": "~2.4",
+        "monolog/monolog": "~1.0",
         "silex/silex": "~1.2",
         "twig/twig": "~1.0"
     },

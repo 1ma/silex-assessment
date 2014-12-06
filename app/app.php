@@ -2,12 +2,22 @@
 
 $app = require_once __DIR__ . '/bootstrap.php';
 
+use Monolog\Logger;
 use Silex\Provider\DoctrineServiceProvider;
+use Silex\Provider\MonologServiceProvider;
 use Silex\Provider\TwigServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
 
 // Services Configuration
 $app->register(new DoctrineServiceProvider());
+
+$app->register(
+    new MonologServiceProvider(),
+    array(
+        'monolog.logfile' => __DIR__ . '/../var/logs/development.log',
+        'monolog.level' => Logger::WARNING
+    )
+);
 
 $app->register(
     new TwigServiceProvider(),
