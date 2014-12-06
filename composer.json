@@ -4,6 +4,7 @@
         "doctrine/dbal": "~2.4",
         "monolog/monolog": "~1.0",
         "silex/silex": "~1.2",
+        "symfony/security": "~2.6",
         "twig/twig": "~1.0"
     },
     "autoload": {
