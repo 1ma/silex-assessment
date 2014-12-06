@@ -1,8 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
-
-$app = new \Silex\Application();
+$app = require_once __DIR__ . '/app.php';
 
 $app['debug'] = true;
 
@@ -14,5 +12,7 @@ $app['db.options'] = array(
     'password' => 'root',
     'charset'  => 'utf8'
 );
+
+$app['monolog.level'] = \Monolog\Logger::DEBUG;
 
 return $app;

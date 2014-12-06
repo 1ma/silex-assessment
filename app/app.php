@@ -1,8 +1,9 @@
 <?php
 
-$app = require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
-use Monolog\Logger;
+use Hospi\Model\UserProvider;
+use Silex\Application;
 use Silex\Provider\DoctrineServiceProvider;
 use Silex\Provider\MonologServiceProvider;
 use Silex\Provider\SecurityServiceProvider;
@@ -10,15 +11,14 @@ use Silex\Provider\SessionServiceProvider;
 use Silex\Provider\TwigServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
 
+$app = new Application();
+
 // Services Configuration
 $app->register(new DoctrineServiceProvider());
 
 $app->register(
     new MonologServiceProvider(),
-    array(
-        'monolog.logfile' => __DIR__ . '/../var/logs/development.log',
-        'monolog.level' => Logger::DEBUG
-    )
+    array('monolog.logfile' => __DIR__ . '/../var/logs/development.log')
 );
 
 $app->register(new SessionServiceProvider());
@@ -26,18 +26,25 @@ $app->register(
     new SecurityServiceProvider(),
     array(
         'security.firewalls' => array(
+            // Permet usuaris anonims a totes les rutes i s'identifiquen per formulari
             'main' => array(
                 'pattern' => '^/',
                 'anonymous' => true,
                 'form' => array('login_path' => '/login', 'login_check' => '/login_check'),
                 'logout' => array('logout_path' => '/logout'),
-                // TODO Set custom UserProvider
-                'users' => array('admin@hospi.dev' => array('ROLE_ADMIN', 'nhDr7OyKlXQju+Ge/WKGrPQ9lPBSUFfpK+B1xqx/+8zLZqRNX0+5G1zBQklXUFy86lCpkAofsExlXiorUcKSNQ=='))
+                'users' => $app->share(function () use ($app) {
+                    return new UserProvider($app['db']);
+                })
             )
         ),
         'security.access_rules' => array(
+            // Deixa entrar al login, arrel i formulari de registre als usuaris anonims
+            array('^/$', 'IS_AUTHENTICATED_ANONYMOUSLY'),
             array('^/login$', 'IS_AUTHENTICATED_ANONYMOUSLY'),
-            array('^/homepage', 'ROLE_ADMIN')
+            array('^/register', 'IS_AUTHENTICATED_ANONYMOUSLY'),
+
+            // A qualsevol altre ruta nomes poden entrar els usuaris identificats i amb rol ROLE_USER
+            array('^/.*$', 'ROLE_USER')
         )
     )
 );
@@ -52,31 +59,17 @@ $app->register(
 
 // Route Definitions
 $app->get('/', function () use ($app) {
-    return 'Welcome to the madness';
-});
+    $text = 'Welcome to the madness bro<br><br>';
 
-$app->get('/hello/{name}', function ($name) use ($app) {
-    return $app['twig']->render(
-        'hello.html.twig',
-        array('name' => $name)
-    );
-});
+    $user = $app['security']->getToken()->getUser();
 
-$app->get('/insert', function (Request $request) use ($app) {
-    $email = $request->query->get('email');
-    $password = $request->query->get('password');
-
-    if (null === $email) {
-        return 'email parameter is missing';
+    if ('anon.' === $user) {
+        $text .= 'No estas identificat (ets un usuari anònim)';
+    } else {
+        $text .= 'Estàs identificat com a ' . $user->getUsername();
     }
 
-    if (null === $password) {
-        return 'password parameter is missing';
-    }
-
-    $app['db']->insert('users', array('email' => $email, 'password' => $password));
-
-    return 'Successful insert';
+    return $text;
 });
 
 $app->get('/login', function (Request $request) use ($app) {
@@ -89,12 +82,16 @@ $app->get('/login', function (Request $request) use ($app) {
     );
 });
 
-$app->post('/logout', function (Request $request) use ($app) {
-    // TODO log out current user and redirect to /
+$app->post('/register', function (Request $request) use ($app) {
+    $email = $request->request->get('email');
+    $password = $request->request->get('password');
+    $app['monolog']->addNotice(sprintf("Nou registre! email '%s' i password '%s", $email, $password));
+
+    return $app->redirect('/');
 });
 
-$app->get('/homepage', function (Request $request) use ($app) {
-    return "<pre>" . print_r($app['security']->getToken()->getUser(), true) . "</pre>";
+$app->get('/register', function (Request $request) use ($app) {
+    return $app['twig']->render('register.html.twig');
 });
 
 return $app;
